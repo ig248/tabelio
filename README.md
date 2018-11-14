@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/ig248/tabelio.svg?branch=master)](https://travis-ci.com/ig248/tabelio)
+[![Coverage Status](https://codecov.io/gh/ig248/tabelio/branch/master/graph/badge.svg)](https://codecov.io/gh/ig248/tabelio)
 
 # Tabelio - a set of IO tools for tabular data
 
