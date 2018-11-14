@@ -12,7 +12,7 @@ File formats are supported by defining a common interface for reading/writing/ap
 
 ## Supported formats
 
-Currently supported formats are: `csv`, `hdf` (`hdf-fixed`) and `hdf-table`).
+Currently supported formats are: `csv`, `hdf` (`hdf-fixed`) and `hdf-table`.
 
 ## Limitations
 
