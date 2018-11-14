@@ -11,13 +11,13 @@ clean:
 	find . | grep -E '(__pycache__|\.pyc|\.pyo$$)' | xargs rm -rf
 
 test:
-	pytest --cov=.
+	pytest --workers 8 --cov=.
 
 test-cov:
-	pytest --cov=. --cov-report html --cov-report term
+	pytest --workers 8 --cov=. --cov-report html --cov-report term
 
 ci-test:
-	pytest --cov=.
+	pytest --workers 8 --cov=.
 
 install:
 	pip install -r requirements.txt
