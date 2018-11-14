@@ -10,7 +10,7 @@ install:
 
 script:
   - make lint
-  - PYTHONPATH=. pytest --workers 8
+  - make ci-test
 
 branches:
   only:
