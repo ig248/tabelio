@@ -5,7 +5,7 @@ python:
     - 3.6
 
 install: 
-  - pip install -r requirements-dev.txt
+  - make dev-install
   - pip install codecov
 
 script:
