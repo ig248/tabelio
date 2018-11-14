@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/.....&branch=master)](https://travis-ci.com/...)
+[![Build Status](https://travis-ci.com/ig248/tabelio.svg?branch=master)](https://travis-ci.com/ig248/tabelio)
 
 # Tabelio - a set of IO tools for tabular data
 
