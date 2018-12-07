@@ -91,11 +91,36 @@ class HDFTableFormat(BaseFormat):
         pd.DataFrame.to_hdf(df, filename, **kwargs)
 
 
+class ParquetFormat(BaseFormat):
+    @classmethod
+    def read(cls, *, filename, **kwargs):
+        defaults = {}
+        kwargs = {**defaults, **kwargs}
+        return pd.read_parquet(filename, **kwargs)
+
+    @classmethod
+    def write(cls, *, df, filename, **kwargs):
+        df = df.reset_index(drop=True)
+        defaults = {}
+        kwargs = {**defaults, **kwargs}
+        pd.DataFrame.to_parquet(df, filename, **kwargs)
+
+    @classmethod
+    def append(cls, *, df, filename, **kwargs):
+        """Append by reading in data first."""
+        if not os.path.isfile(filename):
+            raise FileNotFoundError(f'{filename} must be an existing file.')
+        existing_df = cls.read(filename=filename)
+        df = pd.concat([existing_df, df], axis=0)
+        cls.write(df=df, filename=filename, **kwargs)
+
+
 FORMATS = {
     'csv': CSVFormat,
     'hdf': HDFFixedFormat,
     'hdf-fixed': HDFFixedFormat,
     'hdf-table': HDFTableFormat,
+    'parquet': ParquetFormat
 }
 
 
