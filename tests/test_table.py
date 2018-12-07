@@ -12,7 +12,7 @@ UNKNOWN_EXT = 'unknown'
 
 @pytest.fixture
 def df():
-    return mock_table_data(rows=3)
+    return mock_table_data(rows=3, start_date='2018-01-01')
 
 
 @pytest.fixture
