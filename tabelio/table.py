@@ -51,7 +51,7 @@ class HDFFixedFormat(BaseFormat):
     @classmethod
     def write(cls, *, df, filename, **kwargs):
         df = df.reset_index(drop=True)
-        defaults = dict(key='data', format='fixed')
+        defaults = dict(key='data', format='fixed', mode='w')
         kwargs = {**defaults, **kwargs}
         pd.DataFrame.to_hdf(df, filename, **kwargs)
 
@@ -73,7 +73,7 @@ class HDFTableFormat(BaseFormat):
     @classmethod
     def write(cls, *, df, filename, **kwargs):
         df = df.reset_index(drop=True)
-        defaults = dict(key='data', format='table')
+        defaults = dict(key='data', format='table', mode='w')
         kwargs = {**defaults, **kwargs}
         pd.DataFrame.to_hdf(df, filename, **kwargs)
 
