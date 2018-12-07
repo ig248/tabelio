@@ -128,9 +128,12 @@ def read_table_format(*, filename, format=None, **kwargs):
 def write_table_format(*, df, filename, format=None, append=False, **kwargs):
     format = _find_format(format=format, filename=filename)
     if append:
-        FORMATS[format].append(df=df, filename=filename, **kwargs)
-    else:
-        FORMATS[format].write(df=df, filename=filename, **kwargs)
+        try:
+            FORMATS[format].append(df=df, filename=filename, **kwargs)
+            return filename
+        except FileNotFoundError:
+            pass
+    FORMATS[format].write(df=df, filename=filename, **kwargs)
     return filename
 
 
