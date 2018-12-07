@@ -23,6 +23,13 @@ def double_df(df):
 
 
 @pytest.fixture
+def triple_df(df):
+    ddf = pd.concat([df, df, df])
+    ddf = ddf.reset_index(drop=True)
+    return ddf
+
+
+@pytest.fixture
 def csv_file(df, tmpdir_factory):
     fn = str(tmpdir_factory.mktemp("data").join("temp.csv"))
     df.to_csv(fn, index=False)
@@ -65,6 +72,16 @@ class TestFormat:
         new_df = fmt_class.read(filename=filename)
         pd.testing.assert_frame_equal(new_df, double_df)
 
+    def test_write_append_x2_read(
+        self, format, fmt_class, df, triple_df, tmpdir_factory
+    ):
+        filename = str(tmpdir_factory.mktemp("data").join(f'temp.{format}'))
+        fmt_class.write(df=df, filename=filename)
+        fmt_class.append(df=df, filename=filename)
+        fmt_class.append(df=df, filename=filename)
+        new_df = fmt_class.read(filename=filename)
+        pd.testing.assert_frame_equal(new_df, triple_df)
+
 
 class TestFindFormat:
     @pytest.mark.parametrize(
@@ -103,6 +120,12 @@ class TestReadWrite:
         write_table_format(df=df, filename=filename, append=True)
         new_df = read_table_format(filename=filename)
         pd.testing.assert_frame_equal(new_df, double_df)
+
+    def test_append_read(self, format, df, tmpdir_factory):
+        filename = str(tmpdir_factory.mktemp("data").join(f'temp.{format}'))
+        write_table_format(df=df, filename=filename, append=True)
+        new_df = read_table_format(filename=filename)
+        pd.testing.assert_frame_equal(new_df, df)
 
 
 @pytest.mark.parametrize('to_format', FORMATS.keys())

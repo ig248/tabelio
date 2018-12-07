@@ -51,7 +51,7 @@ class HDFFixedFormat(BaseFormat):
     @classmethod
     def write(cls, *, df, filename, **kwargs):
         df = df.reset_index(drop=True)
-        defaults = dict(key='data', format='fixed')
+        defaults = dict(key='data', format='fixed', mode='w')
         kwargs = {**defaults, **kwargs}
         pd.DataFrame.to_hdf(df, filename, **kwargs)
 
@@ -73,7 +73,7 @@ class HDFTableFormat(BaseFormat):
     @classmethod
     def write(cls, *, df, filename, **kwargs):
         df = df.reset_index(drop=True)
-        defaults = dict(key='data', format='table')
+        defaults = dict(key='data', format='table', mode='w')
         kwargs = {**defaults, **kwargs}
         pd.DataFrame.to_hdf(df, filename, **kwargs)
 
@@ -128,9 +128,12 @@ def read_table_format(*, filename, format=None, **kwargs):
 def write_table_format(*, df, filename, format=None, append=False, **kwargs):
     format = _find_format(format=format, filename=filename)
     if append:
-        FORMATS[format].append(df=df, filename=filename, **kwargs)
-    else:
-        FORMATS[format].write(df=df, filename=filename, **kwargs)
+        try:
+            FORMATS[format].append(df=df, filename=filename, **kwargs)
+            return filename
+        except FileNotFoundError:
+            pass
+    FORMATS[format].write(df=df, filename=filename, **kwargs)
     return filename
 
 
