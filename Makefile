@@ -11,7 +11,7 @@ clean:
 	find . | grep -E '(__pycache__|\.pyc|\.pyo$$)' | xargs rm -rf
 
 test:
-	pytest --workers 8 --cov=.
+	pytest --cov=.
 
 test-cov:
 	pytest --workers 8 --cov=. --cov-report html --cov-report term
