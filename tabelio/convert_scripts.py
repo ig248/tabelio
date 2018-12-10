@@ -9,5 +9,6 @@ def csv2hdf():
 
     args = parser.parse_args()
     convert_table_file(
-        filename=args.filename, from_format='csv', to_format='hdf'
+        filename=args.filename, from_format='csv', to_format='hdf',
+        progress=True
     )

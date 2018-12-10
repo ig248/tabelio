@@ -82,6 +82,26 @@ class TestFormat:
         new_df = fmt_class.read(filename=filename)
         pd.testing.assert_frame_equal(new_df, triple_df)
 
+    @pytest.mark.parametrize('chunk_size, n_chunks', [
+        (1, 3),
+        (2, 2),
+        (3, 1),
+    ])
+    def test_chunks(
+        self,
+        format, fmt_class,
+        df, chunk_size, n_chunks,
+        tmpdir_factory
+    ):
+        filename = str(tmpdir_factory.mktemp("data").join(f'temp.{format}'))
+        fmt_class.write(df=df, filename=filename)
+        new_df_gen = fmt_class.chunks(filename=filename, chunk_size=chunk_size)
+
+        assert len(new_df_gen) == n_chunks
+        for chunk_idx, chunk in enumerate(new_df_gen):
+            assert isinstance(chunk, pd.DataFrame)
+        assert chunk_idx == n_chunks - 1
+
 
 class TestFindFormat:
     @pytest.mark.parametrize(
@@ -128,12 +148,14 @@ class TestReadWrite:
         pd.testing.assert_frame_equal(new_df, df)
 
 
+@pytest.mark.parametrize('chunk_size', [None, 1, 2])
 @pytest.mark.parametrize('to_format', FORMATS.keys())
-def test_convert(df, csv_file, to_format):
+def test_convert(df, csv_file, to_format, chunk_size):
     from_format = 'csv'
     from_file = csv_file
     to_file = convert_table_file(
-        filename=csv_file, from_format=from_format, to_format=to_format
+        filename=csv_file, from_format=from_format, to_format=to_format,
+        chunk_size=chunk_size
     )
     from_df = read_table_format(filename=from_file)
     to_df = read_table_format(filename=to_file)

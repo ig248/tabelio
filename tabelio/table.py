@@ -1,14 +1,22 @@
 import os.path
 
 import pandas as pd
+from tqdm.autonotebook import tqdm
 
 from . import ini
+from .utils import PandasBatchGenerator
 
 
 class BaseFormat:
     @classmethod
     def read(cls, *, filename, **kwargs):
         raise NotImplementedError
+
+    @classmethod
+    def chunks(cls, *, filename, chunk_size=None, **kwargs):
+        """Return data in chunks."""
+        df = cls.read(filename=filename, **kwargs)
+        return PandasBatchGenerator(df, batch_size=chunk_size)
 
     @classmethod
     def write(cls, *, df, filename, **kwargs):
@@ -144,26 +152,43 @@ def _find_format(*, format, filename):
     return format
 
 
-def read_table_format(*, filename, format=None, **kwargs):
+def read_table_format(*, filename, format=None, chunk_size=None, **kwargs):
     format = _find_format(format=format, filename=filename)
-    df = FORMATS[format].read(filename=filename, **kwargs)
-    return df
+    if chunk_size:
+        df_gen = FORMATS[format].chunks(
+            filename=filename,
+            chunk_size=chunk_size,
+            **kwargs
+        )
+        return df_gen
+    else:
+        df = FORMATS[format].read(filename=filename, **kwargs)
+        return df
 
 
-def write_table_format(*, df, filename, format=None, append=False, **kwargs):
+def write_table_format(
+    *, df, filename, format=None, append=False,
+    progress=False, **kwargs,
+):
     format = _find_format(format=format, filename=filename)
-    if append:
-        try:
-            FORMATS[format].append(df=df, filename=filename, **kwargs)
-            return filename
-        except FileNotFoundError:
-            pass
-    FORMATS[format].write(df=df, filename=filename, **kwargs)
+    chunks = df
+    if isinstance(chunks, pd.DataFrame):
+        chunks = [chunks]
+    new_file = not (append and os.path.isfile(filename))
+    for chunk in tqdm(chunks, disable=not progress):
+        if new_file:
+            FORMATS[format].write(df=chunk, filename=filename, **kwargs)
+            new_file = False
+            continue
+        FORMATS[format].append(df=chunk, filename=filename, **kwargs)
     return filename
 
 
 def convert_table_file(
-    *, filename, from_format=None, to_format, from_kwargs=None, to_kwargs=None
+    *, filename, from_format=None, to_format,
+    from_kwargs=None, to_kwargs=None,
+    chunk_size=None,
+    progress=False
 ):
     """Convert table file on disk between formats."""
     basename, from_ext = os.path.splitext(filename)
@@ -171,8 +196,10 @@ def convert_table_file(
     from_kwargs = from_kwargs or {}
     to_kwargs = to_kwargs or {}
     df = read_table_format(
-        filename=filename, format=from_format, **from_kwargs
+        filename=filename, format=from_format,
+        chunk_size=chunk_size, **from_kwargs
     )
     return write_table_format(
-        df=df, filename=to_filename, format=to_format, **to_kwargs
+        df=df, filename=to_filename, format=to_format,
+        progress=progress, **to_kwargs
     )
